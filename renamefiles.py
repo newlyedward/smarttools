@@ -1,16 +1,35 @@
 import os
 import re
 
-path = r'K:\Comics'
-leaf = r'K:\Comics\tumble leaf飘零叶'
 
-def rename(path='.'):
+def not_empty(s):
+    return s and s.strip()
 
-    files = os.listdir(path)
+
+def format_comic_name(path_name):
+    sep = re.compile("[^a-zA-z0-9]+")
+    comic_name = sep.split(path_name.title())
+    return '.'.join(list(filter(not_empty, comic_name)))
+
+common_used_numerals_tmp ={'零':0, '一':1, '二':2, '两':2, '三':3, '四':4, '五':5, '六':6, '七':7,
+
+def format_season_name(comic, season):
+    pattern = re.compile("(?<='第')\w+(?='季')", re.I)
+    m = pattern.search(season).group()
+
+    pass
+
+
+def format_file_name(file_name):
+    pass
+
+
+def rename(tv_path='.'):
+    files = os.listdir(tv_path)
 
     for file in files:
 
-        filename = os.path.join(path, file)
+        filename = os.path.join(tv_path, file)
         if os.path.isdir(filename):
             # rename the dir
             rename(filename)
@@ -30,24 +49,12 @@ def rename(path='.'):
             # sep = '-', '_', '.', ' '
             # delete words like '[xxxx], 720p, 1080p, (2012)'
             #
+            pass
 
         else:
             print('{} is not a file or dir'.format(filename))
 
-'''
-Everythings.Rosie
-Little Charmers梦幻魔法师
-Franklin
-tumble leaf飘零叶
-'''
 
-'''
-Curious George - Season 1（40集）(缺4和7集）
-第二季
-Littlest Pet Shop (2012) - Season 2 1080p
-第1季
-第01季
-'''
 
 '''
 Little.Charmers.S01E01.Prince.Not.So.Charming.-.A.Charming.Outfit.720p.mp4
@@ -72,5 +79,3 @@ Little.Charley.Bear.S01E10.21Jan2011.avi
 02.mpg
 1105.avi
 '''
-
-
