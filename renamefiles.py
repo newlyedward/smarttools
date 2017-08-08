@@ -1,5 +1,6 @@
 import os
 import re
+from utils import chinese2digits
 
 
 def not_empty(s):
@@ -11,17 +12,94 @@ def format_comic_name(path_name):
     comic_name = sep.split(path_name.title())
     return '.'.join(list(filter(not_empty, comic_name)))
 
-common_used_numerals_tmp ={'零':0, '一':1, '二':2, '两':2, '三':3, '四':4, '五':5, '六':6, '七':7,
 
 def format_season_name(comic, season):
-    pattern = re.compile("(?<='第')\w+(?='季')", re.I)
-    m = pattern.search(season).group()
+    pattern = re.compile("(?<=第)\w+(?=季)|(?<=season)\s*\d+", re.I)
 
-    pass
+    try:
+        m = pattern.search(season).group().strip()
+    except AttributeError as e:
+        print(e)
+
+    assert len(m) <= 2
+
+    if m.isdigit():
+        return "{}.S{:02d}".format(comic, int(m))
+    elif m.isnumeric():
+        m = chinese2digits(m)
+        return "{}.S{:02d}".format(comic, m)
+    else:
+        print('Get wrong season name!')
+        return None
 
 
-def format_file_name(file_name):
-    pass
+def format_file_name(file, commic, seasone=''):
+    extension = ['.mkv', '.mp4', '.avi', '.mpg', '.srt']
+    ext = os.path.splitext(file)[1].lower()
+
+    # only handle video file
+    if ext.lower() not in extension:
+        return ''
+
+    # delete extra words and captial the first letter
+    pattern = re.compile("720p|1080p|WEBRip|x264|AAC|\[.+?\]|\(.+?\)", re.I)
+    file = pattern.sub('', file).title()
+
+    # get num in the str
+    num = re.findall("\d+", file)
+
+    # extension includes num, delete the last num in the list num
+    if re.search("\d", ext):
+        num.pop()
+
+    length = len(num)
+
+    if length not in [1, 2]:
+        return ''
+
+    if seasone:
+        if length == 1:
+            e = num[0]
+        else:
+            e = num[1]
+
+        prefix = "{}E{:02d}".format(seasone, int(e) % 100)
+
+    else:
+        if length == 1:
+            digit = int(num[0])
+            if digit < 100:
+                s = 1
+                e = digit
+            elif digit < 10000:
+                s = int(digit / 100)
+                e = digit % 100
+        else:
+            s = int(num[0])
+            e = int(num[1]) % 100
+
+        prefix = "{}.S{:02d}E{:02d}".format(commic, s, e)
+
+    if file[:-4].isdigit():
+        return prefix + ext
+
+    if length > 1:
+        pattern = num[1]
+    else:
+        pattern = num[0]
+
+    postfix = re.split(pattern, file)[-1]
+
+    if len(re.findall("-", postfix)) == 1:
+        sep = re.compile('[\s_.]+')
+    else:
+        sep = re.compile("[-\s_.]+")
+
+    postfix = list(filter(not_empty, sep.split(postfix)))
+    postfix[-1] = postfix[-1].lower()
+    postfix = '.'.join(postfix)
+
+    return prefix + '.' + postfix
 
 
 def rename(tv_path='.'):
@@ -53,29 +131,3 @@ def rename(tv_path='.'):
 
         else:
             print('{} is not a file or dir'.format(filename))
-
-
-
-'''
-Little.Charmers.S01E01.Prince.Not.So.Charming.-.A.Charming.Outfit.720p.mp4
-Bing_S01E01_Fireworks.mp4
-Everythings_Rosie_S01E01_How_To_Hide_An_Oak_Tree.avi
-01.mkv
-4.mp4
-11.mkv.baiduyun.downloading
-[洪恩小乌龟学美语].Franklin.-.hurry.up,franklin.avi
-Tumble.Leaf.S01E03.Beat.of.the.Drumsticks.-.Springy.Surprise[www.lxwc.com.cn].mp4
-Little.Charmers.S01E21.Somewhere.Over.the.Rainbow.-.Circus.Surprise.720p.WEBRip.x264.AAC.mp4
-07_Franklin_s_Masterpiece.avi
-Little.Charley.Bear.S01E01.10Jan2011.avi
-
-Mickey.Mouse.Clubhouse.S04E08.Minnie's.Pet.Salon.720p.mp4
-Mickey.Mouse.Clubhouse.S04E08.Minnie's.Pet.Salon.720p.srt
-
-Little.Charley.Bear.S01E10-teddy-on-a-string.srt
-Little.Charley.Bear.S01E10.21Jan2011.avi
-
-105.avi
-02.mpg
-1105.avi
-'''
