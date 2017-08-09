@@ -1,4 +1,42 @@
 # -*- coding: utf-8 -*-
+import os
+
+
+def delete_dir(path_name):
+    if not os.path.isdir(path_name):
+        print("{} is not a dir".format(path_name))
+        return False
+
+    dirs = os.listdir(path_name)
+
+    if not dirs:
+        os.rmdir(path_name)
+
+        print("移除空目录：" + path_name)
+        return True
+
+    "Thumbs.db"
+    need_review = False
+
+    for item in dirs:
+        subpath = os.path.join(path_name, item)
+
+        if item == "Thumbs.db":
+            try:
+                os.remove(subpath)
+                need_review = True
+            except:
+                print("Cannot delete file {}".format(subpath))
+            continue
+
+        if os.path.isdir(subpath):
+            need_review = need_review or delete_dir(subpath)
+
+    if need_review:
+        print("Reivew {}".format(path_name))
+        return delete_dir(path_name)
+
+
 
 chs_arabic_map = {u'零': 0, u'一': 1, u'二': 2, u'三': 3, u'四': 4,
                   u'五': 5, u'六': 6, u'七': 7, u'八': 8, u'九': 9,
@@ -76,6 +114,10 @@ def chinese2digits(chinese):
     result = result + hnd_mln
     return result
 
+
 if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+    # import doctest
+    # doctest.testmod()
+
+    path_name = r"K:\Photos"
+    delete_dir(path_name)

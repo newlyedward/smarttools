@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 from utils import chinese2digits
@@ -14,7 +15,7 @@ def format_comic_name(path_name):
 
 
 def format_season_name(comic, season):
-    pattern = re.compile("(?<=第)\w+(?=季)|(?<=season)\s*\d+", re.I)
+    pattern = re.compile("(?<=第)\w+(?=季)|(?<=season)\s*\d+|(?<=show)\s*\d+", re.I)
 
     try:
         m = pattern.search(season).group().strip()
@@ -33,7 +34,7 @@ def format_season_name(comic, season):
         return None
 
 
-def format_file_name(file, commic, seasone=''):
+def format_file_name(file, comic, season=''):
     extension = ['.mkv', '.mp4', '.avi', '.mpg', '.srt']
     ext = os.path.splitext(file)[1].lower()
 
@@ -57,13 +58,13 @@ def format_file_name(file, commic, seasone=''):
     if length not in [1, 2]:
         return ''
 
-    if seasone:
+    if season:
         if length == 1:
             e = num[0]
         else:
             e = num[1]
 
-        prefix = "{}E{:02d}".format(seasone, int(e) % 100)
+        prefix = "{}E{:02d}".format(season, int(e) % 100)
 
     else:
         if length == 1:
@@ -74,11 +75,14 @@ def format_file_name(file, commic, seasone=''):
             elif digit < 10000:
                 s = int(digit / 100)
                 e = digit % 100
+            else:
+                print('Season number {:d} is too big'.format(digit))
+                return ''
         else:
             s = int(num[0])
             e = int(num[1]) % 100
 
-        prefix = "{}.S{:02d}E{:02d}".format(commic, s, e)
+        prefix = "{}.S{:02d}E{:02d}".format(comic, s, e)
 
     if file[:-4].isdigit():
         return prefix + ext
@@ -103,16 +107,17 @@ def format_file_name(file, commic, seasone=''):
 
 
 def rename(tv_path='.'):
-    files = os.listdir(tv_path)
+    comics = os.listdir(tv_path)
 
-    for file in files:
+    for comic in comics:
 
-        filename = os.path.join(tv_path, file)
-        if os.path.isdir(filename):
+        comic_name = os.path.join(tv_path, comic)
+
+        assert os.path.isdir(comic_name):
             # rename the dir
-            rename(filename)
+            rename(comic_name)
 
-        elif os.path.isfile(filename):
+        elif os.path.isfile(comic_name):
             # os.renames(old, new) 方法用于递归重命名目录或文件。类似rename()。
             #  new --文件或目录的新名字。甚至可以是包含在目录中的文件，或者完整的目录树。
 
@@ -130,4 +135,4 @@ def rename(tv_path='.'):
             pass
 
         else:
-            print('{} is not a file or dir'.format(filename))
+            print('{} is not a file or dir'.format(comic_name))

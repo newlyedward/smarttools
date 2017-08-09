@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from renamefiles import *
 
 
@@ -25,6 +26,8 @@ def test_format_season_name():
         Curious.George
         Curious.George
         Curious.George
+        Curious.George
+        Curious.George
         Curious.George'''.splitlines()
 
     comic = list(map(str.strip, comic))
@@ -33,6 +36,8 @@ def test_format_season_name():
         第二季
         Littlest Pet Shop (2012) - Season 2 1080p
         第1季
+        加菲猫和朋友们第7季
+        Mr Men show1
         第06季'''.splitlines()
 
     origin = list(map(str.strip, origin))
@@ -40,6 +45,8 @@ def test_format_season_name():
     formated = '''Curious.George.S01
         Curious.George.S02
         Curious.George.S02
+        Curious.George.S01
+        Curious.George.S07
         Curious.George.S01
         Curious.George.S06'''.splitlines()
 
